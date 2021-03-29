@@ -314,10 +314,9 @@ bool processFloraDevice(BLEAddress floraAddress, const char *deviceMacAddress,
 }
 
 void hibernate() {
-  esp_sleep_enable_timer_wakeup(SLEEP_DURATION * 1000000ll);
   Serial.println("Going to sleep now.");
   delay(100);
-  esp_deep_sleep_start();
+  esp_deep_sleep(SLEEP_DURATION * 1000000ll);
 }
 
 void delayedHibernate(void *parameter) {
