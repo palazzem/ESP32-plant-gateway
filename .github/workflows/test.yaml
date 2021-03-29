@@ -1,0 +1,28 @@
+name: test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: python:3.9
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install PlatformIO dependency
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+
+      - name: Build the embedded application (main.cpp)
+        run: pio run -e esp32dev
+
+      - name: Run unittests
+        run: pio test -e native
