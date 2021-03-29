@@ -1,10 +1,11 @@
 /**
-   A BLE client for the Xiaomi Mi Plant Sensor, pushing measurements to an MQTT server.
+   A BLE client for the Xiaomi Mi Plant Sensor, pushing measurements to an MQTT
+   server.
 */
 
 #include "BLEDevice.h"
-#include <WiFi.h>
 #include <PubSubClient.h>
+#include <WiFi.h>
 
 #include "config.h"
 
@@ -47,10 +48,11 @@ void connectWifi() {
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("");
-  
+
   byte ar[6];
   WiFi.macAddress(ar);
-  sprintf(macAddr,"%02X:%02X:%02X:%02X:%02X:%02X",ar[0],ar[1],ar[2],ar[3],ar[4],ar[5]);
+  sprintf(macAddr, "%02X:%02X:%02X:%02X:%02X:%02X", ar[0], ar[1], ar[2], ar[3],
+          ar[4], ar[5]);
 }
 
 void disconnectWifi() {
@@ -80,9 +82,9 @@ void disconnectMqtt() {
   Serial.println("MQTT disconnected");
 }
 
-BLEClient* getFloraClient(BLEAddress floraAddress) {
-  BLEClient* floraClient = BLEDevice::createClient();
-  
+BLEClient *getFloraClient(BLEAddress floraAddress) {
+  BLEClient *floraClient = BLEDevice::createClient();
+
   if (!floraClient->connect(floraAddress)) {
     Serial.println("- Connection failed, skipping");
     return nullptr;
@@ -92,36 +94,33 @@ BLEClient* getFloraClient(BLEAddress floraAddress) {
   return floraClient;
 }
 
-BLERemoteService* getFloraService(BLEClient* floraClient) {
-  BLERemoteService* floraService = nullptr;
+BLERemoteService *getFloraService(BLEClient *floraClient) {
+  BLERemoteService *floraService = nullptr;
 
   try {
     floraService = floraClient->getService(serviceUUID);
-  }
-  catch (...) {
+  } catch (...) {
     // something went wrong
   }
   if (floraService == nullptr) {
     Serial.println("- Failed to find data service");
     Serial.println(serviceUUID.toString().c_str());
-  }
-  else {
+  } else {
     Serial.println("- Found data service");
   }
 
   return floraService;
 }
 
-bool forceFloraServiceDataMode(BLERemoteService* floraService) {
-  BLERemoteCharacteristic* floraCharacteristic;
+bool forceFloraServiceDataMode(BLERemoteService *floraService) {
+  BLERemoteCharacteristic *floraCharacteristic;
 
   // get device mode characteristic, needs to be changed to read data
   Serial.println("- Force device in data mode");
   floraCharacteristic = nullptr;
   try {
     floraCharacteristic = floraService->getCharacteristic(uuid_write_mode);
-  }
-  catch (...) {
+  } catch (...) {
     // something went wrong
   }
   if (floraCharacteristic == nullptr) {
@@ -137,29 +136,28 @@ bool forceFloraServiceDataMode(BLERemoteService* floraService) {
   return true;
 }
 
-bool readFloraDataCharacteristic(BLERemoteService* floraService, String baseTopic) {
-  BLERemoteCharacteristic* floraCharacteristic = nullptr;
+bool readFloraDataCharacteristic(BLERemoteService *floraService,
+                                 String baseTopic) {
+  BLERemoteCharacteristic *floraCharacteristic = nullptr;
 
   // get the main device data characteristic
   Serial.println("- Access characteristic from device");
   try {
     floraCharacteristic = floraService->getCharacteristic(uuid_sensor_data);
-  }
-  catch (...) {
+  } catch (...) {
     // something went wrong
   }
   if (floraCharacteristic == nullptr) {
     Serial.println("-- Failed, skipping device");
     return false;
   }
-  
+
   // read characteristic value
   Serial.println("- Read value from characteristic");
   std::string value;
   try {
     value = floraCharacteristic->readValue();
-  }
-  catch (...) {
+  } catch (...) {
     // something went wrong
     Serial.println("-- Failed, skipping device");
     return false;
@@ -174,19 +172,18 @@ bool readFloraDataCharacteristic(BLERemoteService* floraService, String baseTopi
   Serial.println(" ");
 
   char buffer[64];
-  
-  int16_t* temp_raw = (int16_t*)val;
+
+  int16_t *temp_raw = (int16_t *)val;
   float temperature = (*temp_raw) / ((float)10.0);
   Serial.print("-- Temperature:  ");
   Serial.print(temperature);
   Serial.print("°C");
-  if (temperature!=0 && temperature>-20 && temperature<40) {
+  if (temperature != 0 && temperature > -20 && temperature < 40) {
     snprintf(buffer, 64, "%2.1f", temperature);
     if (client.publish((baseTopic + "temperature").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
-  }
-  else {
+  } else {
     Serial.println("   >> Skip");
   }
 
@@ -194,56 +191,53 @@ bool readFloraDataCharacteristic(BLERemoteService* floraService, String baseTopi
   Serial.print("-- Moisture:     ");
   Serial.print(moisture);
   Serial.print(" %");
-  if (moisture<=100 && moisture>=0) {
+  if (moisture <= 100 && moisture >= 0) {
     snprintf(buffer, 64, "%d", moisture);
     if (client.publish((baseTopic + "moisture").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
-  }
-  else {
+  } else {
     Serial.println("   >> Skip");
   }
-  
+
   int light = val[3] + val[4] * 256;
   Serial.print("-- Light:        ");
   Serial.print(light);
   Serial.print(" lux");
-  if (light>=0) {
+  if (light >= 0) {
     snprintf(buffer, 64, "%d", light);
     if (client.publish((baseTopic + "light").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
-  }
-  else {
+  } else {
     Serial.println("   >> Skip");
   }
-  
+
   int conductivity = val[8] + val[9] * 256;
   Serial.print("-- Conductivity: ");
   Serial.print(conductivity);
   Serial.print(" uS/cm");
-  if (conductivity>=0 && conductivity<5000) { 
+  if (conductivity >= 0 && conductivity < 5000) {
     snprintf(buffer, 64, "%d", conductivity);
     if (client.publish((baseTopic + "conductivity").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
-  }
-  else {
+  } else {
     Serial.println("   >> Skip");
   }
-  
+
   return true;
 }
 
-bool readFloraBatteryCharacteristic(BLERemoteService* floraService, String baseTopic) {
-  BLERemoteCharacteristic* floraCharacteristic = nullptr;
+bool readFloraBatteryCharacteristic(BLERemoteService *floraService,
+                                    String baseTopic) {
+  BLERemoteCharacteristic *floraCharacteristic = nullptr;
 
   // get the device battery characteristic
   Serial.println("- Access battery characteristic from device");
   try {
     floraCharacteristic = floraService->getCharacteristic(uuid_version_battery);
-  }
-  catch (...) {
+  } catch (...) {
     // something went wrong
   }
   if (floraCharacteristic == nullptr) {
@@ -256,8 +250,7 @@ bool readFloraBatteryCharacteristic(BLERemoteService* floraService, String baseT
   std::string value;
   try {
     value = floraCharacteristic->readValue();
-  }
-  catch (...) {
+  } catch (...) {
     // something went wrong
     Serial.println("-- Failed, skipping battery level");
     return false;
@@ -276,7 +269,8 @@ bool readFloraBatteryCharacteristic(BLERemoteService* floraService, String baseT
   return true;
 }
 
-bool processFloraService(BLERemoteService* floraService, const char* deviceMacAddress, bool readBattery) {
+bool processFloraService(BLERemoteService *floraService,
+                         const char *deviceMacAddress, bool readBattery) {
   // set device in data mode
   if (!forceFloraServiceDataMode(floraService)) {
     return false;
@@ -293,7 +287,8 @@ bool processFloraService(BLERemoteService* floraService, const char* deviceMacAd
   return dataSuccess && batterySuccess;
 }
 
-bool processFloraDevice(BLEAddress floraAddress, const char* deviceMacAddress, bool getBattery, int tryCount) {
+bool processFloraDevice(BLEAddress floraAddress, const char *deviceMacAddress,
+                        bool getBattery, int tryCount) {
   Serial.print("Processing Flora device at ");
   Serial.print(floraAddress.toString().c_str());
   Serial.print(" (try ");
@@ -301,20 +296,21 @@ bool processFloraDevice(BLEAddress floraAddress, const char* deviceMacAddress, b
   Serial.println(")");
 
   // connect to flora ble server
-  BLEClient* floraClient = getFloraClient(floraAddress);
+  BLEClient *floraClient = getFloraClient(floraAddress);
   if (floraClient == nullptr) {
     return false;
   }
 
   // connect data service
-  BLERemoteService* floraService = getFloraService(floraClient);
+  BLERemoteService *floraService = getFloraService(floraClient);
   if (floraService == nullptr) {
     floraClient->disconnect();
     return false;
   }
 
   // process devices data
-  bool success = processFloraService(floraService, deviceMacAddress, getBattery);
+  bool success =
+      processFloraService(floraService, deviceMacAddress, getBattery);
 
   // disconnect from device
   floraClient->disconnect();
@@ -344,7 +340,8 @@ void setup() {
   bootCount++;
 
   // create a hibernate task in case something gets stuck
-  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
+  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1,
+              &hibernateTaskHandle);
 
   Serial.println("Initialize BLE client...");
   BLEDevice::init("");
@@ -376,23 +373,23 @@ void setup() {
   char volt[10];
   snprintf(volt, 10, "%4.2f", voltage);
   char topicv[100];
-  strcpy(topicv,"esp/");
-  strcat(topicv,macAddr);
-  strcat(topicv,"/battery_volt");
+  strcpy(topicv, "esp/");
+  strcat(topicv, macAddr);
+  strcat(topicv, "/battery_volt");
   if (client.publish(topicv, volt)) {
     Serial.println("   >> Published");
   }
   // battery percent
-  percent = ((voltage-3.2)/0.7)*100;
+  percent = ((voltage - 3.2) / 0.7) * 100;
   Serial.print("-- Percent: ");
   Serial.print(percent);
   Serial.print(" %");
   char prec[10];
   snprintf(prec, 10, "%4.0f", percent);
   char topicp[100];
-  strcpy(topicp,"esp/");
-  strcat(topicp,macAddr);
-  strcat(topicp,"/battery_prec");
+  strcpy(topicp, "esp/");
+  strcat(topicp, macAddr);
+  strcat(topicp, "/battery_prec");
   if (client.publish(topicp, prec)) {
     Serial.println("   >> Published");
   }
@@ -407,7 +404,8 @@ void setup() {
 
     while (tryCount < RETRY) {
       tryCount++;
-      if (processFloraDevice(floraAddress, FLORA_DEVICES[i], readBattery, tryCount)) {
+      if (processFloraDevice(floraAddress, FLORA_DEVICES[i], readBattery,
+                             tryCount)) {
         break;
       }
       delay(1000);
