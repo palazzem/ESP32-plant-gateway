@@ -9,11 +9,6 @@
 
 #include "config.h"
 
-// variables for storing the ESP32 battery value
-int ADC_Value = 0;
-float voltage = 0;
-float percent = 0;
-
 // boot count used to check if battery status should be read
 RTC_DATA_ATTR int bootCount = 0;
 
@@ -351,48 +346,6 @@ void setup() {
   connectWifi();
   connectMqtt();
 
-  // Reading ESP32 battery value
-  ADC_Value = analogRead(ADC_Pin);
-  Serial.println("");
-  Serial.print("ESP32 at ");
-  Serial.println(macAddr);
-  Serial.print("- Battery monitoring on ADC pin ");
-  Serial.println(ADC_Pin);
-  Serial.print("-- Value: ");
-  Serial.println(ADC_Value);
-  // When you read the ADC you’ll get a 12-bit number from 0 to 4095.
-  // To convert this value to a real voltage you’ll need to divide it
-  // by the maximum value of 4095, then double it (note that Adafruit
-  // halves the voltage), then multiply that by the reference voltage
-  // of the ESP32 which is 3.3V and then finally, multiply that again
-  // by the ADC Reference Voltage of 1.1V.
-  voltage = ADC_Value / 4095.0 * 2.0 * 3.3 * 1.1;
-  Serial.print("-- Voltage: ");
-  Serial.print(voltage);
-  Serial.print(" V");
-  char volt[10];
-  snprintf(volt, 10, "%4.2f", voltage);
-  char topicv[100];
-  strcpy(topicv, "esp/");
-  strcat(topicv, macAddr);
-  strcat(topicv, "/battery_volt");
-  if (client.publish(topicv, volt)) {
-    Serial.println("   >> Published");
-  }
-  // battery percent
-  percent = ((voltage - 3.2) / 0.7) * 100;
-  Serial.print("-- Percent: ");
-  Serial.print(percent);
-  Serial.print(" %");
-  char prec[10];
-  snprintf(prec, 10, "%4.0f", percent);
-  char topicp[100];
-  strcpy(topicp, "esp/");
-  strcat(topicp, macAddr);
-  strcat(topicp, "/battery_prec");
-  if (client.publish(topicp, prec)) {
-    Serial.println("   >> Published");
-  }
   Serial.println("");
   // check if battery status should be read - based on boot count
   bool readBattery = ((bootCount % BATTERY_INTERVAL) == 0);

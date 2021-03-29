@@ -23,10 +23,6 @@ const int RETRY = 3;
 const char *WIFI_SSID = "";
 const char *WIFI_PASSWORD = "";
 
-// Adafruit HUZZAH32 ESP32 Feather Battery is connected to ADC pin A13 (or 35)
-// TODO: remove because it can't realistically be collect in % manner
-const int ADC_Pin = A13;
-
 // MQTT configuration to connect to a MQTT server. Authentication is required.
 const int MQTT_PORT = 1883;
 const char *MQTT_HOST = "";
