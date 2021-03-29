@@ -12,6 +12,11 @@ class Octopus {
         void deinitWiFi();
         void initBluetooth(const char *deviceName);
         void deinitBluetooth();
+        void initMQTT(const char *clientId, const char *host, const int port, const char *username, const char *password);
+        void deinitMQTT();
+        PubSubClient getMQTTClient();
+    private:
+        PubSubClient m_mqtt_client;
 };
 
 #endif

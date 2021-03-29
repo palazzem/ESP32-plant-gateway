@@ -29,30 +29,7 @@ char macAddr[18];
 
 TaskHandle_t hibernateTaskHandle = NULL;
 
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-void connectMqtt() {
-  Serial.println("Connecting to MQTT...");
-  client.setServer(MQTT_HOST, MQTT_PORT);
-
-  while (!client.connected()) {
-    if (!client.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD)) {
-      Serial.print("MQTT connection failed:");
-      Serial.print(client.state());
-      Serial.println("Retrying...");
-      delay(MQTT_RETRY_WAIT);
-    }
-  }
-
-  Serial.println("MQTT connected");
-  Serial.println("");
-}
-
-void disconnectMqtt() {
-  client.disconnect();
-  Serial.println("MQTT disconnected");
-}
+Octopus octo = Octopus();
 
 BLEClient *getFloraClient(BLEAddress floraAddress) {
   BLEClient *floraClient = BLEDevice::createClient();
@@ -152,7 +129,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print("°C");
   if (temperature != 0 && temperature > -20 && temperature < 40) {
     snprintf(buffer, 64, "%2.1f", temperature);
-    if (client.publish((baseTopic + "temperature").c_str(), buffer)) {
+    if (octo.getMQTTClient().publish((baseTopic + "temperature").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -165,7 +142,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print(" %");
   if (moisture <= 100 && moisture >= 0) {
     snprintf(buffer, 64, "%d", moisture);
-    if (client.publish((baseTopic + "moisture").c_str(), buffer)) {
+    if (octo.getMQTTClient().publish((baseTopic + "moisture").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -178,7 +155,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print(" lux");
   if (light >= 0) {
     snprintf(buffer, 64, "%d", light);
-    if (client.publish((baseTopic + "light").c_str(), buffer)) {
+    if (octo.getMQTTClient().publish((baseTopic + "light").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -191,7 +168,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print(" uS/cm");
   if (conductivity >= 0 && conductivity < 5000) {
     snprintf(buffer, 64, "%d", conductivity);
-    if (client.publish((baseTopic + "conductivity").c_str(), buffer)) {
+    if (octo.getMQTTClient().publish((baseTopic + "conductivity").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -235,7 +212,7 @@ bool readFloraBatteryCharacteristic(BLERemoteService *floraService,
   Serial.print(battery);
   Serial.println(" %");
   snprintf(buffer, 64, "%d", battery);
-  client.publish((baseTopic + "battery").c_str(), buffer);
+  octo.getMQTTClient().publish((baseTopic + "battery").c_str(), buffer);
   Serial.println("   >> Published");
 
   return true;
@@ -304,7 +281,6 @@ void delayedHibernate(void *parameter) {
 
 void setup() {
   // all action is done when device is woken up
-  Octopus octo = Octopus();
   Serial.begin(115200);
   delay(1000);
 
@@ -315,11 +291,10 @@ void setup() {
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1,
               &hibernateTaskHandle);
 
+  // Octopus activates the entire stack
   octo.initBluetooth(_DEVICE_NAME);
-
-  // connecting wifi and mqtt server
   octo.initWifi(WIFI_SSID, WIFI_PASSWORD);
-  connectMqtt();
+  octo.initMQTT(MQTT_CLIENTID, MQTT_HOST, MQTT_PORT, MQTT_USERNAME, MQTT_PASSWORD);
 
   Serial.println("");
   // check if battery status should be read - based on boot count
@@ -344,7 +319,7 @@ void setup() {
   // disconnect wifi and mqtt
   octo.deinitWiFi();
   octo.deinitBluetooth();
-  disconnectMqtt();
+  octo.deinitMQTT();
 
   // delete emergency hibernate task
   vTaskDelete(hibernateTaskHandle);

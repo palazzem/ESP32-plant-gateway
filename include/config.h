@@ -6,6 +6,7 @@
 
 // List of internal configurations
 #define _DEVICE_NAME "esp-controller"
+#define _MQTT_RETRY_WAIT 5000
 
 // List compatible MiFlora sensors MAC address(es)
 const char *FLORA_DEVICES[] = {};
@@ -40,8 +41,5 @@ const char *MQTT_CLIENTID = "";
 // where MAC_ADDRESS is one of the values from FLORA_DEVICES array
 // property is either temperature, moisture, conductivity, light or battery
 const String MQTT_BASE_TOPIC = "";
-
-// Retry before trying to publish data again over MQTT (in milliseconds)
-const int MQTT_RETRY_WAIT = 5000;
 
 #endif
