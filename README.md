@@ -1,18 +1,34 @@
-## ESP32_MiFlora_MQTT
+# ESP32 MiFlora Gateway
 
-Arduino sketch - ESP32 BLE client for XIaomi Mi Flora Plant sensors. ESP32 can be powered with LiPo battery and battery level is read from ADC pin. ESP32 battery level and Mi Flora sensor measurements are pushed to the MQTT server.
+ESP32 BLE client for MiFlora compatible sensors. ESP32 metrics and MiFlora
+sensor measurements are pushed through MQTT.
 
-## Hardware & Software used
+## Requirements
 
-- Adafruit HUZZAH32 – ESP32 Feather Board - https://www.adafruit.com/product/3405
-- Adafruit Lithium Ion Battery 3.7v 2000mAh - https://www.adafruit.com/product/2011
-- Xiaomi Mi Plant Sensor
-- MQTT server: Home Assistant Mosquitto broker add-on - https://home-assistant.io
+- A compatible ESP32 board
+- A compatible MiFlora sensor
+- MQTT server with authentication enabled. [Mosquitto container][1] is a good start
+- (optional) A home automation software such as [Home Assistant][2]
+
+[1]: https://hub.docker.com/_/eclipse-mosquitto
+[2]: https://www.home-assistant.io/
+
+## Compatible Boards
+
+This sketch has been tested against the following boards:
+- Adafruit HUZZAH32 – Feather Board
+- ESP-WROOM-32 - Development Board
+
+## Supported MiFlora Sensors
+
+This sketch has been tested with the following MiFlora devices:
+- VegTrug Flower Care Soil Tester
+- WANFEI Flower Care Soil Tester
 
 ## Setup
 
 1. Edit settings in config.h:
-- FLORA_DEVICES - MAC address(es) of your Xiaomi Mi Plant sensor(s)
+- FLORA_DEVICES - MAC address(es) of your MiFlora sensor(s)
 - SLEEP_DURATION - sleep duration between sensor reads
 - EMERGENCY_HIBERNATE - emergency hibernate countdown when something gets stuck
 - BATTERY_INTERVAL - Mi Flora battery status read interval
@@ -24,12 +40,10 @@ Arduino sketch - ESP32 BLE client for XIaomi Mi Flora Plant sensors. ESP32 can b
 
 2. Open sketch in Arduino, compile & upload.
 
-3. esp_miflora.yaml - Example MQTT sensor config for Home Assistant (replace MAC addresses in the file for your MiFlora & ESP32)
+## (optional) Home Assistant setup
+
+TBD.
 
 ## Credits
 
-- Original arduino sketch - https://github.com/sidddy/flora
-- More ideas for the sketch - https://github.com/Pi-And-More/PAM-ESP32-Multi-MiFlora
-- Battery Monitoring on the Adafruit Huzzah32 ESP32 - http://cuddletech.com/?p=1030
-- Calculating battery percentage using an Arduino - https://electronics.stackexchange.com/questions/110104/calculating-battery-percentage-using-an-arduino
-- Adafruit HUZZAH32 – ESP32 Feather Board Power Management - https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/power-management
+- Original fork: https://github.com/e6on/ESP32_MiFlora_MQTT
