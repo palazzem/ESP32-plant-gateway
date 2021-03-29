@@ -8,6 +8,7 @@
 #include <WiFi.h>
 
 #include "config.h"
+#include "octopus.h"
 
 // boot count used to check if battery status should be read
 RTC_DATA_ATTR int bootCount = 0;
@@ -30,30 +31,6 @@ TaskHandle_t hibernateTaskHandle = NULL;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-void connectWifi() {
-  Serial.println("Connecting to WiFi...");
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("");
-
-  byte ar[6];
-  WiFi.macAddress(ar);
-  sprintf(macAddr, "%02X:%02X:%02X:%02X:%02X:%02X", ar[0], ar[1], ar[2], ar[3],
-          ar[4], ar[5]);
-}
-
-void disconnectWifi() {
-  WiFi.disconnect(true);
-  Serial.println("WiFi disonnected");
-}
 
 void connectMqtt() {
   Serial.println("Connecting to MQTT...");
@@ -327,6 +304,7 @@ void delayedHibernate(void *parameter) {
 
 void setup() {
   // all action is done when device is woken up
+  Octopus octo = Octopus();
   Serial.begin(115200);
   delay(1000);
 
@@ -342,7 +320,7 @@ void setup() {
   BLEDevice::setPower(ESP_PWR_LVL_P7);
 
   // connecting wifi and mqtt server
-  connectWifi();
+  octo.initWifi(WIFI_SSID, WIFI_PASSWORD);
   connectMqtt();
 
   Serial.println("");
@@ -366,7 +344,7 @@ void setup() {
   }
 
   // disconnect wifi and mqtt
-  disconnectWifi();
+  octo.deinitWiFi();
   disconnectMqtt();
 
   // delete emergency hibernate task
