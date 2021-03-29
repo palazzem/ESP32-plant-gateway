@@ -1,48 +1,41 @@
-/**
- * Defines configuration constants that are used inside the application.
- */
-#ifndef PLANT_CONFIG_H
-#define PLANT_CONFIG_H
-
-#include <WString.h>
+#include <config.h>
 
 // List compatible MiFlora sensors MAC address(es)
-extern const char *FLORA_DEVICES[];
-extern const int DEVICE_COUNT;
+const char *FLORA_DEVICES[] = {};
+
+const int DEVICE_COUNT = sizeof FLORA_DEVICES / sizeof FLORA_DEVICES[0];
 
 // Sleep between runs (seconds)
-extern const int SLEEP_DURATION;
+const int SLEEP_DURATION = 30 * 60;
 
 // Emergency hibernate countdown triggered when the device is stuck (seconds)
-extern const int EMERGENCY_HIBERNATE;
+const int EMERGENCY_HIBERNATE = 3 * 60;
 
 // Number of runs after which sensors battery info is collected
-extern const int BATTERY_INTERVAL;
+const int BATTERY_INTERVAL = 6;
 
 // Number of retries in reading a sensor data before bailing out
-extern const int RETRY;
+const int RETRY = 3;
 
 // WiFi (AP) credentials
-extern const char *WIFI_SSID;
-extern const char *WIFI_PASSWORD;
+const char *WIFI_SSID = "";
+const char *WIFI_PASSWORD = "";
 
 // MQTT configuration to connect to a MQTT server. Authentication is required.
-extern const int MQTT_PORT;
-extern const char *MQTT_HOST;
-extern const char *MQTT_USERNAME;
-extern const char *MQTT_PASSWORD;
+const int MQTT_PORT = 1883;
+const char *MQTT_HOST = "";
+const char *MQTT_USERNAME = "";
+const char *MQTT_PASSWORD = "";
 
 // MQTT Client ID used by the board to register in the MQTT server.
 // Example: `miflora-client-1`.
-extern const char *MQTT_CLIENTID;
+const char *MQTT_CLIENTID = "";
 
 // MQTT topic are defined as "<MQTT_BASE_TOPIC>/<MAC_ADDRESS>/<property>"
 // where MAC_ADDRESS is one of the values from FLORA_DEVICES array
 // property is either temperature, moisture, conductivity, light or battery
-extern const String MQTT_BASE_TOPIC;
+const String MQTT_BASE_TOPIC = "";
 
 // List of internal configurations
-extern const char *_DEVICE_NAME;
-extern const int _MQTT_RETRY_WAIT;
-
-#endif
+const char *_DEVICE_NAME = "";
+const int _MQTT_RETRY_WAIT = 5000;

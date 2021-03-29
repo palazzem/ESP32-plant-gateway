@@ -36,7 +36,7 @@ void Octopus::deinitBluetooth() {
   BLEDevice::deinit();
 }
 
-PubSubClient Octopus::initMQTT(const char *clientId, const char *host, const int port, const char *username, const char *password) {
+void Octopus::initMQTT(const char *clientId, const char *host, const int port, const char *username, const char *password) {
   WiFiClient espClient;
   PubSubClient client(espClient);
   m_mqtt_client = client;

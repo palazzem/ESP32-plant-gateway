@@ -1,8 +1,7 @@
 /**
-   A BLE client for the Xiaomi Mi Plant Sensor, pushing measurements to an MQTT
-   server.
-*/
-
+ * Application that retrieves data from compatible MiFlora devices and publishes
+ * collected data over the wire via MQTT.
+ */
 #include <BLEDevice.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -12,9 +11,6 @@
 
 // boot count used to check if battery status should be read
 RTC_DATA_ATTR int bootCount = 0;
-
-// device count
-static int deviceCount = sizeof FLORA_DEVICES / sizeof FLORA_DEVICES[0];
 
 // the remote service we wish to connect to
 static BLEUUID serviceUUID("00001204-0000-1000-8000-00805f9b34fb");
@@ -301,7 +297,7 @@ void setup() {
   bool readBattery = ((bootCount % BATTERY_INTERVAL) == 0);
 
   // process devices
-  for (int i = 0; i < deviceCount; i++) {
+  for (int i = 0; i < DEVICE_COUNT; i++) {
     int tryCount = 0;
     BLEAddress floraAddress(FLORA_DEVICES[i]);
 
