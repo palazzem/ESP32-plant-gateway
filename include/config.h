@@ -4,6 +4,9 @@
 #ifndef PLANT_CONFIG_H
 #define PLANT_CONFIG_H
 
+// List of internal configurations
+#define _DEVICE_NAME "esp-controller"
+
 // List compatible MiFlora sensors MAC address(es)
 const char *FLORA_DEVICES[] = {};
 

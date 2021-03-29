@@ -1,4 +1,5 @@
 #include <WiFi.h>
+#include <BLEDevice.h>
 
 #include "octopus.h"
 
@@ -21,4 +22,14 @@ void Octopus::initWifi(const char *ssid, const char *password) {
 void Octopus::deinitWiFi() {
   WiFi.disconnect(true);
   Serial.println("WiFi disonnected");
+}
+
+void Octopus::initBluetooth(const char *deviceName) {
+  Serial.println("Initialize BLE client...");
+  BLEDevice::init(deviceName);
+  BLEDevice::setPower(ESP_PWR_LVL_P7);
+}
+
+void Octopus::deinitBluetooth() {
+  BLEDevice::deinit();
 }

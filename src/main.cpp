@@ -315,9 +315,7 @@ void setup() {
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1,
               &hibernateTaskHandle);
 
-  Serial.println("Initialize BLE client...");
-  BLEDevice::init("");
-  BLEDevice::setPower(ESP_PWR_LVL_P7);
+  octo.initBluetooth(_DEVICE_NAME);
 
   // connecting wifi and mqtt server
   octo.initWifi(WIFI_SSID, WIFI_PASSWORD);
@@ -345,6 +343,7 @@ void setup() {
 
   // disconnect wifi and mqtt
   octo.deinitWiFi();
+  octo.deinitBluetooth();
   disconnectMqtt();
 
   // delete emergency hibernate task
