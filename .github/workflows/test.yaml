@@ -22,7 +22,7 @@ jobs:
           pip install --upgrade platformio
 
       - name: Build the embedded application (main.cpp)
-        run: pio run -e esp32dev
+        run: make build
 
   unittest:
     runs-on: ubuntu-latest
@@ -40,4 +40,17 @@ jobs:
           pio platform install native
 
       - name: Run unittests
-        run: pio test -e native
+        run: make tests
+
+  linting:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install clang-format
+        run: sudo apt-get install clang-format
+
+      - name: Verify codebase linting
+        run: make format-check
