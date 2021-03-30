@@ -21,14 +21,21 @@ SensorReader::SensorReader() { this->mBLEClient = BLEDevice::createClient(); }
 bool SensorReader::setService(const BLEUUID uuid) {
   try {
     this->mService = this->mBLEClient->getService(serviceUUID);
+    Serial.println("Service detected");
     if (this->mService == nullptr) {
       // Failed to find the service, bailing out the entire operation
+      Serial.println("Failure (nullptr)");
       this->mBLEClient->disconnect();
+      return false;
     }
   } catch (...) {
     // TODO: handle exceptions and log
+    Serial.println("Failure (exception)");
     this->mBLEClient->disconnect();
+    return false;
   }
+
+  return true;
 }
 
 const char *SensorReader::readRawData(const BLEUUID uuid) {
