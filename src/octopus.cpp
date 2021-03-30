@@ -5,7 +5,17 @@
 #include "config.h"
 #include "octopus.h"
 
-Octopus::Octopus() {}
+// Both clients must stay in the outer scope, otherwise the destructor
+// is called, causing a NULL pointer access crash.
+// TODO: maybe Octopus must not declare this and inject from the outside for
+// simplified testing.
+WiFiClient wifiClient;
+PubSubClient mqttClient;
+
+Octopus::Octopus() {
+  mqttClient.setClient(wifiClient);
+  this->m_mqtt_client = mqttClient;
+}
 
 void Octopus::initWifi(const char *ssid, const char *password) {
   Serial.println("Connecting to WiFi...");
@@ -37,17 +47,13 @@ void Octopus::deinitBluetooth() {
 }
 
 void Octopus::initMQTT(const char *clientId, const char *host, const int port, const char *username, const char *password) {
-  WiFiClient espClient;
-  PubSubClient client(espClient);
-  m_mqtt_client = client;
-
   Serial.println("Connecting to MQTT...");
-  client.setServer(host, port);
+  this->m_mqtt_client.setServer(host, port);
 
-  while (!client.connected()) {
-    if (!client.connect(clientId, username, password)) {
+  while (!this->m_mqtt_client.connected()) {
+    if (!this->m_mqtt_client.connect(clientId, username, password)) {
       Serial.print("MQTT connection failed:");
-      Serial.print(client.state());
+      Serial.print(this->m_mqtt_client.state());
       Serial.println("Retrying...");
       delay(_MQTT_RETRY_WAIT);
     }
@@ -57,11 +63,11 @@ void Octopus::initMQTT(const char *clientId, const char *host, const int port, c
   Serial.println("");
 }
 
-PubSubClient Octopus::getMQTTClient() {
-  return m_mqtt_client;
+bool Octopus::publish(const char *topic, const char *payload) {
+  return this->m_mqtt_client.publish(topic, payload);
 }
 
 void Octopus::deinitMQTT() {
-  m_mqtt_client.disconnect();
+  this->m_mqtt_client.disconnect();
   Serial.println("MQTT disconnected");
 }

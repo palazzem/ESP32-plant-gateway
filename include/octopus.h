@@ -6,6 +6,8 @@
 #define OCTOPUS_H
 
 class Octopus {
+    private:
+        PubSubClient m_mqtt_client;
     public:
         Octopus();
         void initWifi(const char *ssid, const char *password);
@@ -14,9 +16,7 @@ class Octopus {
         void deinitBluetooth();
         void initMQTT(const char *clientId, const char *host, const int port, const char *username, const char *password);
         void deinitMQTT();
-        PubSubClient getMQTTClient();
-    private:
-        PubSubClient m_mqtt_client;
+        bool publish(const char *topic, const char *payload);
 };
 
 #endif

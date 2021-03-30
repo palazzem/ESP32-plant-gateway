@@ -125,7 +125,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print("°C");
   if (temperature != 0 && temperature > -20 && temperature < 40) {
     snprintf(buffer, 64, "%2.1f", temperature);
-    if (octo.getMQTTClient().publish((baseTopic + "temperature").c_str(), buffer)) {
+    if (octo.publish((baseTopic + "temperature").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -138,7 +138,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print(" %");
   if (moisture <= 100 && moisture >= 0) {
     snprintf(buffer, 64, "%d", moisture);
-    if (octo.getMQTTClient().publish((baseTopic + "moisture").c_str(), buffer)) {
+    if (octo.publish((baseTopic + "moisture").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -151,7 +151,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print(" lux");
   if (light >= 0) {
     snprintf(buffer, 64, "%d", light);
-    if (octo.getMQTTClient().publish((baseTopic + "light").c_str(), buffer)) {
+    if (octo.publish((baseTopic + "light").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -164,7 +164,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   Serial.print(" uS/cm");
   if (conductivity >= 0 && conductivity < 5000) {
     snprintf(buffer, 64, "%d", conductivity);
-    if (octo.getMQTTClient().publish((baseTopic + "conductivity").c_str(), buffer)) {
+    if (octo.publish((baseTopic + "conductivity").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
   } else {
@@ -208,7 +208,7 @@ bool readFloraBatteryCharacteristic(BLERemoteService *floraService,
   Serial.print(battery);
   Serial.println(" %");
   snprintf(buffer, 64, "%d", battery);
-  octo.getMQTTClient().publish((baseTopic + "battery").c_str(), buffer);
+  octo.publish((baseTopic + "battery").c_str(), buffer);
   Serial.println("   >> Published");
 
   return true;
@@ -313,9 +313,9 @@ void setup() {
   }
 
   // disconnect wifi and mqtt
+  octo.deinitMQTT();
   octo.deinitWiFi();
   octo.deinitBluetooth();
-  octo.deinitMQTT();
 
   // delete emergency hibernate task
   vTaskDelete(hibernateTaskHandle);
@@ -324,7 +324,5 @@ void setup() {
   hibernate();
 }
 
-void loop() {
-  /// we're not doing anything in the loop, only on device wakeup
-  delay(10000);
-}
+// Loop is never called. The system goes in deep sleep during `setup()`.
+void loop() {}
