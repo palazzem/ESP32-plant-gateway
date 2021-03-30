@@ -20,9 +20,6 @@ static BLEUUID uuid_version_battery("00001a02-0000-1000-8000-00805f9b34fb");
 static BLEUUID uuid_sensor_data("00001a01-0000-1000-8000-00805f9b34fb");
 static BLEUUID uuid_write_mode("00001a00-0000-1000-8000-00805f9b34fb");
 
-// ESP32 MAC address
-char macAddr[18];
-
 TaskHandle_t hibernateTaskHandle = NULL;
 
 Octopus octo = Octopus();
