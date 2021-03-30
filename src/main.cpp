@@ -9,6 +9,7 @@
 #include "config.h"
 #include "octopus.h"
 #include "plant.h"
+#include "sensor_reader.h"
 
 // boot count used to check if battery status should be read
 RTC_DATA_ATTR int bootCount = 0;
@@ -24,6 +25,7 @@ static BLEUUID uuid_write_mode("00001a00-0000-1000-8000-00805f9b34fb");
 TaskHandle_t hibernateTaskHandle = NULL;
 
 Octopus octo = Octopus();
+SensorReader sensorReader = SensorReader();
 
 BLEClient *getFloraClient(BLEAddress floraAddress) {
   BLEClient *floraClient = BLEDevice::createClient();
@@ -280,9 +282,6 @@ void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  // increase boot count
-  bootCount++;
-
   // create a hibernate task in case something gets stuck
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1,
               &hibernateTaskHandle);
@@ -293,24 +292,23 @@ void setup() {
   octo.initMQTT(MQTT_CLIENTID, MQTT_HOST, MQTT_PORT, MQTT_USERNAME,
                 MQTT_PASSWORD);
 
-  Serial.println("");
-  // check if battery status should be read - based on boot count
-  bool readBattery = ((bootCount % BATTERY_INTERVAL) == 0);
-
   // process devices
   for (int i = 0; i < DEVICE_COUNT; i++) {
-    int tryCount = 0;
+    int retry = 0;
+    PlantMetrics metrics;
     Plant plant = {FLORA_DEVICES[i], {}};
-    BLEAddress floraAddress(plant.macAddr);
 
-    while (tryCount < RETRY) {
-      tryCount++;
-      if (processFloraDevice(floraAddress, plant, readBattery, tryCount)) {
+    while (retry < RETRY) {
+      ++retry;
+      bool result = sensorReader.query(plant, plant.metrics);
+      if (result) {
+        Serial.println("Sensor read with success!");
         break;
       }
-      delay(1000);
     }
-    delay(1500);
+
+    // TODO: needs to send data via Octopus (aka: Dispatcher)
+    plant.metrics = metrics;
   }
 
   // disconnect wifi and mqtt

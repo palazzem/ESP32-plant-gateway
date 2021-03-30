@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <BLEDevice.h>
 
 #include "config.h"
@@ -17,7 +18,7 @@ uint8_t payloadDataMode[2] = {0xA0, 0x1F};
 
 SensorReader::SensorReader() { this->mBLEClient = BLEDevice::createClient(); }
 
-void SensorReader::setService(const BLEUUID uuid) {
+bool SensorReader::setService(const BLEUUID uuid) {
   try {
     this->mService = this->mBLEClient->getService(serviceUUID);
     if (this->mService == nullptr) {
@@ -66,29 +67,59 @@ int SensorReader::parseConductivity(const char *rawData) {
 
 int SensorReader::parseBattery(const char *rawData) { return rawData[0]; }
 
-PlantMetrics SensorReader::query(Plant plant) {
+bool SensorReader::query(Plant plant, PlantMetrics &metrics) {
+  Serial.println("Start reading sensors...");
   // Connect using Bluetooth LE
   BLEAddress macAddr = BLEAddress(plant.macAddr);
-  this->mBLEClient->connect(macAddr);
+  if (!this->mBLEClient->connect(macAddr)) {
+    Serial.println("Connection via bluetooth failed");
+    return false;
+  }
+  Serial.println("Connected to device");
 
   // Retrieve sensors characteristics
-  this->setService(serviceUUID);
+  if (!this->setService(serviceUUID)) {
+    Serial.println("Service retrieval failed - bailing out");
+    return false;
+  }
+  Serial.println("Service retrieved...");
 
   // Retrieve sensors data
-  PlantMetrics metrics{};
   const char *rawSensorData = this->readRawData(uuid_sensor_data);
+  if (rawSensorData == nullptr) {
+    Serial.println("Reading sensor data failed - bailing out");
+    return false;
+  }
+
   metrics.temperature = this->parseTemperature(rawSensorData);
   metrics.moisture = this->parseMoisture(rawSensorData);
   metrics.light = this->parseLight(rawSensorData);
   metrics.conductivity = this->parseConductivity(rawSensorData);
+  Serial.println("Readings:");
+  Serial.print("- Temperature: ");
+  Serial.println(metrics.temperature);
+  Serial.print("- Moisture: ");
+  Serial.println(metrics.moisture);
+  Serial.print("- Light: ");
+  Serial.println(metrics.light);
+  Serial.print("- Conductivity: ");
+  Serial.println(metrics.conductivity);
 
   // Retrieve battery data: it requires a different characteristic
   rawSensorData = this->readRawData(uuid_version_battery);
+  if (rawSensorData == nullptr) {
+    Serial.println("Reading sensor battery failed - bailing out");
+    return false;
+  }
+
   metrics.battery = this->parseBattery(rawSensorData);
+  Serial.print("- Battery: ");
+  Serial.println(metrics.battery);
 
   // Disconnect bluetooth client
   // TODO: check client deconstructor and see if it implements RAII
   this->mBLEClient->disconnect();
+  Serial.println("Bluetooth disconnected");
 
-  return metrics;
+  return true;
 }
