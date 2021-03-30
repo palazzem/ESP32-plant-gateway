@@ -21,7 +21,6 @@ SensorReader::SensorReader() { this->mBLEClient = BLEDevice::createClient(); }
 bool SensorReader::setService(const BLEUUID uuid) {
   try {
     this->mService = this->mBLEClient->getService(serviceUUID);
-    Serial.println("Service detected");
     if (this->mService == nullptr) {
       // Failed to find the service, bailing out the entire operation
       Serial.println("Failure (nullptr)");
@@ -32,6 +31,25 @@ bool SensorReader::setService(const BLEUUID uuid) {
     // TODO: handle exceptions and log
     Serial.println("Failure (exception)");
     this->mBLEClient->disconnect();
+    return false;
+  }
+
+  return true;
+}
+
+bool SensorReader::enableDataMode(const BLEUUID uuid) {
+  // Safe-guard: bailout if connection or service are not available
+  if (!this->mBLEClient->isConnected() || this->mService == nullptr) {
+    return false;
+  }
+
+  // Set service in data mode (required to collect data)
+  BLERemoteCharacteristic *sensor;
+  try {
+    sensor = this->mService->getCharacteristic(uuid);
+    sensor->writeValue(payloadDataMode, 2, true);
+  } catch (...) {
+    // TODO: handle exceptions and log
     return false;
   }
 
@@ -75,21 +93,26 @@ int SensorReader::parseConductivity(const char *rawData) {
 int SensorReader::parseBattery(const char *rawData) { return rawData[0]; }
 
 bool SensorReader::query(Plant plant, PlantMetrics &metrics) {
-  Serial.println("Start reading sensors...");
+  Serial.println("Query sensor...");
   // Connect using Bluetooth LE
   BLEAddress macAddr = BLEAddress(plant.macAddr);
   if (!this->mBLEClient->connect(macAddr)) {
-    Serial.println("Connection via bluetooth failed");
+    Serial.println("Connection via bluetooth failed - bailing out");
     return false;
   }
-  Serial.println("Connected to device");
+  Serial.println("Connected to device!");
 
-  // Retrieve sensors characteristics
+  // Set sensor service
   if (!this->setService(serviceUUID)) {
     Serial.println("Service retrieval failed - bailing out");
     return false;
   }
-  Serial.println("Service retrieved...");
+
+  // Put the sensor in data mode (write bytes over bluetooth)
+  if (!this->enableDataMode(uuid_write_mode)) {
+    Serial.println("Enable data mode failed - bailing out");
+    return false;
+  }
 
   // Retrieve sensors data
   const char *rawSensorData = this->readRawData(uuid_sensor_data);
@@ -126,7 +149,7 @@ bool SensorReader::query(Plant plant, PlantMetrics &metrics) {
   // Disconnect bluetooth client
   // TODO: check client deconstructor and see if it implements RAII
   this->mBLEClient->disconnect();
-  Serial.println("Bluetooth disconnected");
+  Serial.println("Query completed. Disconnecting!");
 
   return true;
 }

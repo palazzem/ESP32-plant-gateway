@@ -10,6 +10,7 @@ private:
   BLEClient *mBLEClient;
   BLERemoteService *mService;
   bool setService(const BLEUUID uuid);
+  bool enableDataMode(const BLEUUID uuid);
   const char *readRawData(const BLEUUID uuid);
   float parseTemperature(const char *rawData);
   int parseMoisture(const char *rawData);
