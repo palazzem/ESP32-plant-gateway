@@ -1,6 +1,6 @@
-#include <WiFi.h>
 #include <BLEDevice.h>
 #include <PubSubClient.h>
+#include <WiFi.h>
 
 #include "config.h"
 #include "octopus.h"
@@ -42,11 +42,10 @@ void Octopus::initBluetooth(const char *deviceName) {
   BLEDevice::setPower(ESP_PWR_LVL_P7);
 }
 
-void Octopus::deinitBluetooth() {
-  BLEDevice::deinit();
-}
+void Octopus::deinitBluetooth() { BLEDevice::deinit(); }
 
-void Octopus::initMQTT(const char *clientId, const char *host, const int port, const char *username, const char *password) {
+void Octopus::initMQTT(const char *clientId, const char *host, const int port,
+                       const char *username, const char *password) {
   Serial.println("Connecting to MQTT...");
   this->m_mqtt_client.setServer(host, port);
 

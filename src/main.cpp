@@ -290,7 +290,8 @@ void setup() {
   // Octopus activates the entire stack
   octo.initBluetooth(_DEVICE_NAME);
   octo.initWifi(WIFI_SSID, WIFI_PASSWORD);
-  octo.initMQTT(MQTT_CLIENTID, MQTT_HOST, MQTT_PORT, MQTT_USERNAME, MQTT_PASSWORD);
+  octo.initMQTT(MQTT_CLIENTID, MQTT_HOST, MQTT_PORT, MQTT_USERNAME,
+                MQTT_PASSWORD);
 
   Serial.println("");
   // check if battery status should be read - based on boot count
