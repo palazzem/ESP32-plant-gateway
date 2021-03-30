@@ -17,107 +17,74 @@ uint8_t payloadDataMode[2] = {0xA0, 0x1F};
 
 SensorReader::SensorReader() { this->mBLEClient = BLEDevice::createClient(); }
 
-PlantMetrics SensorReader::query(Plant plant) {
-  PlantMetrics metrics{};
-
-  // Connect over Bluetooth
-  BLEAddress macAddr = BLEAddress(plant.macAddr);
-  this->mBLEClient->connect(macAddr);
-
-  // Retrieve service data
-  BLERemoteService *bleService;
+void SensorReader::setService(const BLEUUID uuid) {
   try {
-    bleService = this->mBLEClient->getService(serviceUUID);
-    if (bleService == nullptr) {
-      // Failed to find data
+    this->mService = this->mBLEClient->getService(serviceUUID);
+    if (this->mService == nullptr) {
+      // Failed to find the service, bailing out the entire operation
       this->mBLEClient->disconnect();
-      return metrics;
     }
   } catch (...) {
     // TODO: handle exceptions and log
     this->mBLEClient->disconnect();
-    return metrics;
   }
+}
 
-  // Set service in data mode (required to collect data)
-  BLERemoteCharacteristic *characteristic;
-  try {
-    characteristic = bleService->getCharacteristic(uuid_write_mode);
-    if (characteristic == nullptr) {
-      // Failed to retrieve sensor characteristics
-      this->mBLEClient->disconnect();
-      return metrics;
-    }
-    characteristic->writeValue(payloadDataMode, 2, true);
-  } catch (...) {
-    // TODO: handle exceptions and log
-    this->mBLEClient->disconnect();
-    return metrics;
+const char *SensorReader::readRawData(const BLEUUID uuid) {
+  // Safe-guard: bailout if connection or service are not available
+  if (!this->mBLEClient->isConnected() || this->mService == nullptr) {
+    return nullptr;
   }
 
   // Retrieve sensors data
+  std::string sensorData;
+  BLERemoteCharacteristic *sensor;
   try {
-    characteristic = bleService->getCharacteristic(uuid_sensor_data);
-    if (characteristic == nullptr) {
-      // Failed to retrieve sensor characteristics
-      this->mBLEClient->disconnect();
-      return metrics;
-    }
+    sensor = this->mService->getCharacteristic(uuid);
+    sensorData = sensor->readValue();
+    return sensorData.c_str();
   } catch (...) {
     // TODO: handle exceptions and log
-    this->mBLEClient->disconnect();
-    return metrics;
+    return nullptr;
   }
+}
 
-  // Read values
-  std::string value;
-  try {
-    value = characteristic->readValue();
-  } catch (...) {
-    // TODO: handle exceptions and log
-    this->mBLEClient->disconnect();
-    return metrics;
-  }
-  const char *val = value.c_str();
+float SensorReader::parseTemperature(const char *rawData) {
+  int16_t *temp_raw = (int16_t *)rawData;
+  return (*temp_raw) / ((float)10.0);
+}
 
-  // Parse temperature
-  int16_t *temp_raw = (int16_t *)val;
-  metrics.temperature = (*temp_raw) / ((float)10.0);
+int SensorReader::parseMoisture(const char *rawData) { return rawData[7]; }
 
-  // Parse moisture
-  metrics.moisture = val[7];
+int SensorReader::parseLight(const char *rawData) {
+  return rawData[3] + rawData[4] * 256;
+}
 
-  // Parse light
-  metrics.light = val[3] + val[4] * 256;
+int SensorReader::parseConductivity(const char *rawData) {
+  return rawData[8] + rawData[9] * 256;
+}
 
-  // Parse conductivity
-  metrics.conductivity = val[8] + val[9] * 256;
+int SensorReader::parseBattery(const char *rawData) { return rawData[0]; }
 
-  // Retrieve battery data
-  try {
-    characteristic = bleService->getCharacteristic(uuid_version_battery);
-    if (characteristic == nullptr) {
-      // Failed to retrieve sensor characteristics
-      this->mBLEClient->disconnect();
-      return metrics;
-    }
-  } catch (...) {
-    // TODO: handle exceptions and log
-    this->mBLEClient->disconnect();
-    return metrics;
-  }
+PlantMetrics SensorReader::query(Plant plant) {
+  // Connect using Bluetooth LE
+  BLEAddress macAddr = BLEAddress(plant.macAddr);
+  this->mBLEClient->connect(macAddr);
 
-  // Read battery levels
-  std::string value;
-  try {
-    value = characteristic->readValue();
-  } catch (...) {
-    // TODO: handle exceptions and log
-    this->mBLEClient->disconnect();
-    return metrics;
-  }
-  const char *val2 = value.c_str();
-  metrics.battery = val2[0];
+  // Retrieve sensors characteristics
+  this->setService(serviceUUID);
+
+  // Retrieve sensors data
+  PlantMetrics metrics{};
+  const char *rawSensorData = this->readRawData(uuid_sensor_data);
+  metrics.temperature = this->parseTemperature(rawSensorData);
+  metrics.moisture = this->parseMoisture(rawSensorData);
+  metrics.light = this->parseLight(rawSensorData);
+  metrics.conductivity = this->parseConductivity(rawSensorData);
+
+  // Retrieve battery data: it requires a different characteristic
+  rawSensorData = this->readRawData(uuid_version_battery);
+  metrics.battery = this->parseBattery(rawSensorData);
 
   // Disconnect bluetooth client
   // TODO: check client deconstructor and see if it implements RAII
