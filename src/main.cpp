@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "octopus.h"
+#include "plant.h"
 
 // boot count used to check if battery status should be read
 RTC_DATA_ATTR int bootCount = 0;
@@ -78,7 +79,7 @@ bool forceFloraServiceDataMode(BLERemoteService *floraService) {
   return true;
 }
 
-bool readFloraDataCharacteristic(BLERemoteService *floraService,
+bool readFloraDataCharacteristic(Plant plant, BLERemoteService *floraService,
                                  String baseTopic) {
   BLERemoteCharacteristic *floraCharacteristic = nullptr;
 
@@ -116,12 +117,13 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   char buffer[64];
 
   int16_t *temp_raw = (int16_t *)val;
-  float temperature = (*temp_raw) / ((float)10.0);
+  plant.temperature = (*temp_raw) / ((float)10.0);
   Serial.print("-- Temperature:  ");
-  Serial.print(temperature);
+  Serial.print(plant.temperature);
   Serial.print("°C");
-  if (temperature != 0 && temperature > -20 && temperature < 40) {
-    snprintf(buffer, 64, "%2.1f", temperature);
+  if (plant.temperature != 0 && plant.temperature > -20 &&
+      plant.temperature < 40) {
+    snprintf(buffer, 64, "%2.1f", plant.temperature);
     if (octo.publish((baseTopic + "temperature").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -129,12 +131,12 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
     Serial.println("   >> Skip");
   }
 
-  int moisture = val[7];
+  plant.moisture = val[7];
   Serial.print("-- Moisture:     ");
-  Serial.print(moisture);
+  Serial.print(plant.moisture);
   Serial.print(" %");
-  if (moisture <= 100 && moisture >= 0) {
-    snprintf(buffer, 64, "%d", moisture);
+  if (plant.moisture <= 100 && plant.moisture >= 0) {
+    snprintf(buffer, 64, "%d", plant.moisture);
     if (octo.publish((baseTopic + "moisture").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -142,12 +144,12 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
     Serial.println("   >> Skip");
   }
 
-  int light = val[3] + val[4] * 256;
+  plant.light = val[3] + val[4] * 256;
   Serial.print("-- Light:        ");
-  Serial.print(light);
+  Serial.print(plant.light);
   Serial.print(" lux");
-  if (light >= 0) {
-    snprintf(buffer, 64, "%d", light);
+  if (plant.light >= 0) {
+    snprintf(buffer, 64, "%d", plant.light);
     if (octo.publish((baseTopic + "light").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -155,12 +157,12 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
     Serial.println("   >> Skip");
   }
 
-  int conductivity = val[8] + val[9] * 256;
+  plant.conductivity = val[8] + val[9] * 256;
   Serial.print("-- Conductivity: ");
-  Serial.print(conductivity);
+  Serial.print(plant.conductivity);
   Serial.print(" uS/cm");
-  if (conductivity >= 0 && conductivity < 5000) {
-    snprintf(buffer, 64, "%d", conductivity);
+  if (plant.conductivity >= 0 && plant.conductivity < 5000) {
+    snprintf(buffer, 64, "%d", plant.conductivity);
     if (octo.publish((baseTopic + "conductivity").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -171,7 +173,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService,
   return true;
 }
 
-bool readFloraBatteryCharacteristic(BLERemoteService *floraService,
+bool readFloraBatteryCharacteristic(Plant plant, BLERemoteService *floraService,
                                     String baseTopic) {
   BLERemoteCharacteristic *floraCharacteristic = nullptr;
 
@@ -198,39 +200,41 @@ bool readFloraBatteryCharacteristic(BLERemoteService *floraService,
     return false;
   }
   const char *val2 = value.c_str();
-  int battery = val2[0];
+  plant.battery = val2[0];
 
   char buffer[64];
   Serial.print("-- Battery:      ");
-  Serial.print(battery);
+  Serial.print(plant.battery);
   Serial.println(" %");
-  snprintf(buffer, 64, "%d", battery);
+  snprintf(buffer, 64, "%d", plant.battery);
   octo.publish((baseTopic + "battery").c_str(), buffer);
   Serial.println("   >> Published");
 
   return true;
 }
 
-bool processFloraService(BLERemoteService *floraService,
-                         const char *deviceMacAddress, bool readBattery) {
+bool processFloraService(BLERemoteService *floraService, Plant plant,
+                         bool readBattery) {
   // set device in data mode
   if (!forceFloraServiceDataMode(floraService)) {
     return false;
   }
 
-  String baseTopic = MQTT_BASE_TOPIC + "/" + deviceMacAddress + "/";
-  bool dataSuccess = readFloraDataCharacteristic(floraService, baseTopic);
+  String baseTopic = MQTT_BASE_TOPIC + "/" + plant.macAddr + "/";
+  bool dataSuccess =
+      readFloraDataCharacteristic(plant, floraService, baseTopic);
 
   bool batterySuccess = true;
   if (readBattery) {
-    batterySuccess = readFloraBatteryCharacteristic(floraService, baseTopic);
+    batterySuccess =
+        readFloraBatteryCharacteristic(plant, floraService, baseTopic);
   }
 
   return dataSuccess && batterySuccess;
 }
 
-bool processFloraDevice(BLEAddress floraAddress, const char *deviceMacAddress,
-                        bool getBattery, int tryCount) {
+bool processFloraDevice(BLEAddress floraAddress, Plant plant, bool getBattery,
+                        int tryCount) {
   Serial.print("Processing Flora device at ");
   Serial.print(floraAddress.toString().c_str());
   Serial.print(" (try ");
@@ -251,8 +255,7 @@ bool processFloraDevice(BLEAddress floraAddress, const char *deviceMacAddress,
   }
 
   // process devices data
-  bool success =
-      processFloraService(floraService, deviceMacAddress, getBattery);
+  bool success = processFloraService(floraService, plant, getBattery);
 
   // disconnect from device
   floraClient->disconnect();
@@ -297,12 +300,12 @@ void setup() {
   // process devices
   for (int i = 0; i < DEVICE_COUNT; i++) {
     int tryCount = 0;
-    BLEAddress floraAddress(FLORA_DEVICES[i]);
+    Plant plant = {FLORA_DEVICES[i]};
+    BLEAddress floraAddress(plant.macAddr);
 
     while (tryCount < RETRY) {
       tryCount++;
-      if (processFloraDevice(floraAddress, FLORA_DEVICES[i], readBattery,
-                             tryCount)) {
+      if (processFloraDevice(floraAddress, plant, readBattery, tryCount)) {
         break;
       }
       delay(1000);
