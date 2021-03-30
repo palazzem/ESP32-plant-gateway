@@ -117,13 +117,13 @@ bool readFloraDataCharacteristic(Plant plant, BLERemoteService *floraService,
   char buffer[64];
 
   int16_t *temp_raw = (int16_t *)val;
-  plant.temperature = (*temp_raw) / ((float)10.0);
+  plant.metrics.temperature = (*temp_raw) / ((float)10.0);
   Serial.print("-- Temperature:  ");
-  Serial.print(plant.temperature);
+  Serial.print(plant.metrics.temperature);
   Serial.print("°C");
-  if (plant.temperature != 0 && plant.temperature > -20 &&
-      plant.temperature < 40) {
-    snprintf(buffer, 64, "%2.1f", plant.temperature);
+  if (plant.metrics.temperature != 0 && plant.metrics.temperature > -20 &&
+      plant.metrics.temperature < 40) {
+    snprintf(buffer, 64, "%2.1f", plant.metrics.temperature);
     if (octo.publish((baseTopic + "temperature").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -131,12 +131,12 @@ bool readFloraDataCharacteristic(Plant plant, BLERemoteService *floraService,
     Serial.println("   >> Skip");
   }
 
-  plant.moisture = val[7];
+  plant.metrics.moisture = val[7];
   Serial.print("-- Moisture:     ");
-  Serial.print(plant.moisture);
+  Serial.print(plant.metrics.moisture);
   Serial.print(" %");
-  if (plant.moisture <= 100 && plant.moisture >= 0) {
-    snprintf(buffer, 64, "%d", plant.moisture);
+  if (plant.metrics.moisture <= 100 && plant.metrics.moisture >= 0) {
+    snprintf(buffer, 64, "%d", plant.metrics.moisture);
     if (octo.publish((baseTopic + "moisture").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -144,12 +144,12 @@ bool readFloraDataCharacteristic(Plant plant, BLERemoteService *floraService,
     Serial.println("   >> Skip");
   }
 
-  plant.light = val[3] + val[4] * 256;
+  plant.metrics.light = val[3] + val[4] * 256;
   Serial.print("-- Light:        ");
-  Serial.print(plant.light);
+  Serial.print(plant.metrics.light);
   Serial.print(" lux");
-  if (plant.light >= 0) {
-    snprintf(buffer, 64, "%d", plant.light);
+  if (plant.metrics.light >= 0) {
+    snprintf(buffer, 64, "%d", plant.metrics.light);
     if (octo.publish((baseTopic + "light").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -157,12 +157,12 @@ bool readFloraDataCharacteristic(Plant plant, BLERemoteService *floraService,
     Serial.println("   >> Skip");
   }
 
-  plant.conductivity = val[8] + val[9] * 256;
+  plant.metrics.conductivity = val[8] + val[9] * 256;
   Serial.print("-- Conductivity: ");
-  Serial.print(plant.conductivity);
+  Serial.print(plant.metrics.conductivity);
   Serial.print(" uS/cm");
-  if (plant.conductivity >= 0 && plant.conductivity < 5000) {
-    snprintf(buffer, 64, "%d", plant.conductivity);
+  if (plant.metrics.conductivity >= 0 && plant.metrics.conductivity < 5000) {
+    snprintf(buffer, 64, "%d", plant.metrics.conductivity);
     if (octo.publish((baseTopic + "conductivity").c_str(), buffer)) {
       Serial.println("   >> Published");
     }
@@ -200,13 +200,13 @@ bool readFloraBatteryCharacteristic(Plant plant, BLERemoteService *floraService,
     return false;
   }
   const char *val2 = value.c_str();
-  plant.battery = val2[0];
+  plant.metrics.battery = val2[0];
 
   char buffer[64];
   Serial.print("-- Battery:      ");
-  Serial.print(plant.battery);
+  Serial.print(plant.metrics.battery);
   Serial.println(" %");
-  snprintf(buffer, 64, "%d", plant.battery);
+  snprintf(buffer, 64, "%d", plant.metrics.battery);
   octo.publish((baseTopic + "battery").c_str(), buffer);
   Serial.println("   >> Published");
 
@@ -300,7 +300,7 @@ void setup() {
   // process devices
   for (int i = 0; i < DEVICE_COUNT; i++) {
     int tryCount = 0;
-    Plant plant = {FLORA_DEVICES[i]};
+    Plant plant = {FLORA_DEVICES[i], {}};
     BLEAddress floraAddress(plant.macAddr);
 
     while (tryCount < RETRY) {
