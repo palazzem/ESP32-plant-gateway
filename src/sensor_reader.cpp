@@ -16,7 +16,7 @@ const BLEUUID uuid_write_mode("00001a00-0000-1000-8000-00805f9b34fb");
 // Bytes needed to put the sensor in data mode
 uint8_t payloadDataMode[2] = {0xA0, 0x1F};
 
-SensorReader::SensorReader() {
+SensorReader::SensorReader(PlantConfig config) {
   BLEDevice::init(DEVICE_NAME);
   BLEDevice::setPower(ESP_PWR_LVL_P7);
   this->mBLEClient = BLEDevice::createClient();

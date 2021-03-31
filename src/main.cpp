@@ -38,7 +38,7 @@ void setup() {
 
   // Initializing these components, brings up all the network stack
   Octopus octo = Octopus(config);
-  SensorReader sensorReader = SensorReader();
+  SensorReader sensorReader = SensorReader(config);
 
   // process devices
   for (int i = 0; i < sizeof(config.sensorsMacAddr); i++) {

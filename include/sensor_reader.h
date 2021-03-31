@@ -3,6 +3,7 @@
 
 #include <BLEDevice.h>
 
+#include "config.h"
 #include "plant.h"
 
 class SensorReader {
@@ -19,7 +20,7 @@ private:
   int parseBattery(const char *rawData);
 
 public:
-  SensorReader();
+  SensorReader(PlantConfig config);
   ~SensorReader();
   bool query(Plant plant, PlantMetrics &metrics);
 };
