@@ -5,6 +5,7 @@
 #ifndef OCTOPUS_H
 #define OCTOPUS_H
 
+#include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
 
