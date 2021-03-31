@@ -11,16 +11,18 @@
 #include "plant.h"
 #include "sensor_reader.h"
 
+PlantConfig config{};
+
 TaskHandle_t hibernateTaskHandle = NULL;
 
 void hibernate() {
   Serial.println("Going to sleep now.");
   delay(100);
-  esp_deep_sleep(SLEEP_DURATION * 1000000ll);
+  esp_deep_sleep(config.deepSleepDuration * 1000000ll);
 }
 
 void delayedHibernate(void *parameter) {
-  delay(EMERGENCY_HIBERNATE * 1000); // delay for five minutes
+  delay(config.emergencySleepDuration * 1000); // delay for five minutes
   Serial.println("Something got stuck, entering emergency hibernate...");
   hibernate();
 }
@@ -44,12 +46,12 @@ void setup() {
                 MQTT_PASSWORD);
 
   // process devices
-  for (int i = 0; i < DEVICE_COUNT; i++) {
+  for (int i = 0; i < sizeof(config.sensorsMacAddr); i++) {
     int retry = 0;
     PlantMetrics metrics;
-    Plant plant = {FLORA_DEVICES[i], {}};
+    Plant plant = {config.sensorsMacAddr[i]};
 
-    while (retry < RETRY) {
+    while (retry < config.sensorReadingRetries) {
       ++retry;
       bool result = sensorReader.query(plant, plant.metrics);
       if (result) {
