@@ -13,9 +13,6 @@
 
 TaskHandle_t hibernateTaskHandle = NULL;
 
-Octopus octo = Octopus();
-SensorReader sensorReader = SensorReader();
-
 void hibernate() {
   Serial.println("Going to sleep now.");
   delay(100);
@@ -37,8 +34,11 @@ void setup() {
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1,
               &hibernateTaskHandle);
 
+  // Initializing these components, brings up all the network stack
+  Octopus octo = Octopus();
+  SensorReader sensorReader = SensorReader();
+
   // Octopus activates the entire stack
-  octo.initBluetooth(_DEVICE_NAME);
   octo.initWifi(WIFI_SSID, WIFI_PASSWORD);
   octo.initMQTT(MQTT_CLIENTID, MQTT_HOST, MQTT_PORT, MQTT_USERNAME,
                 MQTT_PASSWORD);
@@ -65,14 +65,11 @@ void setup() {
   // disconnect wifi and mqtt
   octo.deinitMQTT();
   octo.deinitWiFi();
-  octo.deinitBluetooth();
 
   // delete emergency hibernate task
   vTaskDelete(hibernateTaskHandle);
-
-  // go to sleep now
-  hibernate();
 }
 
-// Loop is never called. The system goes in deep sleep during `setup()`.
-void loop() {}
+// Loop is not used. When this code path is reached, the system goes in deep
+// sleep mode.
+void loop() { hibernate(); }

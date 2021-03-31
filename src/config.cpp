@@ -37,5 +37,4 @@ const char *MQTT_CLIENTID = "";
 const String MQTT_BASE_TOPIC = "";
 
 // List of internal configurations
-const char *_DEVICE_NAME = "";
 const int _MQTT_RETRY_WAIT = 5000;

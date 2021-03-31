@@ -20,6 +20,7 @@ private:
 
 public:
   SensorReader();
+  ~SensorReader();
   bool query(Plant plant, PlantMetrics &metrics);
 };
 

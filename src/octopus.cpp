@@ -1,9 +1,4 @@
-#include <BLEDevice.h>
-#include <PubSubClient.h>
-#include <WiFi.h>
-
-#include "config.h"
-#include "octopus.h"
+#include <octopus.h>
 
 // Both clients must stay in the outer scope, otherwise the destructor
 // is called, causing a NULL pointer access crash.
@@ -35,14 +30,6 @@ void Octopus::deinitWiFi() {
   WiFi.disconnect(true);
   Serial.println("WiFi disonnected");
 }
-
-void Octopus::initBluetooth(const char *deviceName) {
-  Serial.println("Initialize BLE client...");
-  BLEDevice::init(deviceName);
-  BLEDevice::setPower(ESP_PWR_LVL_P7);
-}
-
-void Octopus::deinitBluetooth() { BLEDevice::deinit(); }
 
 void Octopus::initMQTT(const char *clientId, const char *host, const int port,
                        const char *username, const char *password) {

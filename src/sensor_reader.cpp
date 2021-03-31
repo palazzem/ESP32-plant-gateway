@@ -2,6 +2,9 @@
 
 #include "config.h"
 
+// Module configuration
+const char *DEVICE_NAME = "esp32-controller";
+
 // Service identifier the system connects to
 const BLEUUID serviceUUID("00001204-0000-1000-8000-00805f9b34fb");
 
@@ -13,7 +16,16 @@ const BLEUUID uuid_write_mode("00001a00-0000-1000-8000-00805f9b34fb");
 // Bytes needed to put the sensor in data mode
 uint8_t payloadDataMode[2] = {0xA0, 0x1F};
 
-SensorReader::SensorReader() { this->mBLEClient = BLEDevice::createClient(); }
+SensorReader::SensorReader() {
+  BLEDevice::init(DEVICE_NAME);
+  BLEDevice::setPower(ESP_PWR_LVL_P7);
+  this->mBLEClient = BLEDevice::createClient();
+}
+
+SensorReader::~SensorReader() {
+  this->mBLEClient->disconnect();
+  BLEDevice::deinit();
+}
 
 bool SensorReader::setService(const BLEUUID uuid) {
   try {

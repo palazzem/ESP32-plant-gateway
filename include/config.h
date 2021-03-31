@@ -42,7 +42,6 @@ extern const char *MQTT_CLIENTID;
 extern const String MQTT_BASE_TOPIC;
 
 // List of internal configurations
-extern const char *_DEVICE_NAME;
 extern const int _MQTT_RETRY_WAIT;
 
 #endif
