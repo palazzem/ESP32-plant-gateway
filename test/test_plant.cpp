@@ -1,6 +1,6 @@
 #include <unity.h>
 
-#include "plant.h"
+#include <plant.h>
 
 void test_plant_struct(void) {
   Plant plant{"AA:00:04:00:XX:YY"};
