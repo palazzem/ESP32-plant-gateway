@@ -37,13 +37,8 @@ void setup() {
               &hibernateTaskHandle);
 
   // Initializing these components, brings up all the network stack
-  Octopus octo = Octopus();
+  Octopus octo = Octopus(config);
   SensorReader sensorReader = SensorReader();
-
-  // Octopus activates the entire stack
-  octo.initWifi(WIFI_SSID, WIFI_PASSWORD);
-  octo.initMQTT(MQTT_CLIENTID, MQTT_HOST, MQTT_PORT, MQTT_USERNAME,
-                MQTT_PASSWORD);
 
   // process devices
   for (int i = 0; i < sizeof(config.sensorsMacAddr); i++) {
@@ -63,10 +58,6 @@ void setup() {
     // TODO: needs to send data via Octopus (aka: Dispatcher)
     plant.metrics = metrics;
   }
-
-  // disconnect wifi and mqtt
-  octo.deinitMQTT();
-  octo.deinitWiFi();
 
   // delete emergency hibernate task
   vTaskDelete(hibernateTaskHandle);

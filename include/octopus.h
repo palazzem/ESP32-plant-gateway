@@ -14,12 +14,8 @@ private:
   PubSubClient m_mqtt_client;
 
 public:
-  Octopus();
-  void initWifi(const char *ssid, const char *password);
-  void deinitWiFi();
-  void initMQTT(const char *clientId, const char *host, const int port,
-                const char *username, const char *password);
-  void deinitMQTT();
+  Octopus(PlantConfig config);
+  ~Octopus();
   bool publish(const char *topic, const char *payload);
 };
 
