@@ -23,7 +23,6 @@ Octopus::Octopus(PlantConfig config) {
   while (!this->m_mqtt_client.connected()) {
     if (!this->m_mqtt_client.connect(config.mqttClientID, config.mqttUsername,
                                      config.mqttPassword)) {
-      Serial.print(this->m_mqtt_client.state());
       delay(config.mqttRetryWait);
     }
   }
