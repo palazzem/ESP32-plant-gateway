@@ -22,7 +22,7 @@ Dispatcher::Dispatcher(AppConfig config) {
 
   while (!this->mqtt_client_.connected()) {
     if (!this->mqtt_client_.connect(config.mqtt_client_id, config.mqtt_username,
-                                     config.mqtt_password)) {
+                                    config.mqtt_password)) {
       delay(config.mqtt_retry_wait);
     }
   }

@@ -1,5 +1,5 @@
-#ifndef MOCK_WIFI_H
-#define MOCK_WIFI_H
+#ifndef MOCK_WIFI_H_
+#define MOCK_WIFI_H_
 
 #include <WiFiClient.h>
 
@@ -15,7 +15,7 @@ typedef enum {
 } wl_status_t;
 
 class WiFiClass {
-public:
+ public:
   WiFiClass();
 
   virtual wl_status_t begin(const char *ssid, const char *passphrase) {
@@ -27,4 +27,4 @@ public:
 
 extern WiFiClass WiFi;
 
-#endif
+#endif  // MOCK_WIFI_H_

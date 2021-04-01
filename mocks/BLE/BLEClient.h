@@ -1,14 +1,14 @@
 #ifndef MOCK_BLE_CLIENT_H_
 #define MOCK_BLE_CLIENT_H_
 
-#include <BLEUUID.h>
 #include <BLEAddress.h>
 #include <BLERemoteService.h>
+#include <BLEUUID.h>
 
 class BLEClient {
-public:
+ public:
   BLEClient();
-  
+
   bool connect(BLEAddress address);
   void disconnect();
   BLERemoteService* getService(BLEUUID uuid);

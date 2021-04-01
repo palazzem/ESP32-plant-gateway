@@ -8,7 +8,7 @@
 #include "plant.h"
 
 class SensorReader {
-private:
+ private:
   BLEClient *ble_client_;
   BLERemoteService *ble_service_;
 
@@ -21,7 +21,7 @@ private:
   int parseConductivity(const char *raw_data);
   int parseBattery(const char *raw_data);
 
-public:
+ public:
   SensorReader(AppConfig config);
   ~SensorReader();
   bool query(Plant plant, PlantMetrics &metrics);

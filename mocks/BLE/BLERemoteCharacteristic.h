@@ -4,7 +4,7 @@
 #include <string>
 
 class BLERemoteCharacteristic {
-public:
+ public:
   void writeValue(uint8_t* data, size_t length, bool response = false);
   std::string readValue();
 };

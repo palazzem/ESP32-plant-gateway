@@ -7,8 +7,8 @@
 #include <WiFi.h>
 
 #include "config.h"
-#include "plant.h"
 #include "dispatcher.h"
+#include "plant.h"
 #include "sensor_reader.h"
 
 AppConfig config{};
@@ -22,7 +22,7 @@ void hibernate() {
 }
 
 void delayedHibernate(void *parameter) {
-  delay(config.emergency_sleep_duration * 1000); // delay for five minutes
+  delay(config.emergency_sleep_duration * 1000);  // delay for five minutes
   Serial.println("Something got stuck, entering emergency hibernate...");
   hibernate();
 }

@@ -1,10 +1,10 @@
-#ifndef MOCK_PUBSUBCLIENT_H
-#define MOCK_PUBSUBCLIENT_H
+#ifndef MOCK_PUBSUBCLIENT_H_
+#define MOCK_PUBSUBCLIENT_H_
 
 #include <Client.h>
 
 class PubSubClient {
-public:
+ public:
   PubSubClient();
 
   virtual PubSubClient &setClient(Client &client);
@@ -17,4 +17,4 @@ public:
   virtual int state();
 };
 
-#endif
+#endif  // MOCK_PUBSUBCLIENT_H_

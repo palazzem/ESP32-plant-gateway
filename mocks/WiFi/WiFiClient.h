@@ -1,8 +1,8 @@
-#ifndef MOCK_WIFICLIENT_H
-#define MOCK_WIFICLIENT_H
+#ifndef MOCK_WIFICLIENT_H_
+#define MOCK_WIFICLIENT_H_
 
 #include <Client.h>
 
 class WiFiClient : public Client {};
 
-#endif
+#endif  // MOCK_WIFICLIENT_H_

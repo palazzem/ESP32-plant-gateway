@@ -1,6 +1,6 @@
-#ifndef MOCK_PUBSUBCLIENT_CLIENT_H
-#define MOCK_PUBSUBCLIENT_CLIENT_H
+#ifndef MOCK_ARDUINO_CLIENT_H_
+#define MOCK_ARDUINO_CLIENT_H_
 
 class Client {};
 
-#endif
+#endif  // MOCK_ARDUINO_CLIENT_H_

@@ -4,7 +4,7 @@
 #include <string>
 
 class BLEUUID {
-public:
+ public:
   BLEUUID(std::string uuid);
 };
 
