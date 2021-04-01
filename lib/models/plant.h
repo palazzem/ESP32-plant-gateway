@@ -1,5 +1,5 @@
-#ifndef PLANT_H
-#define PLANT_H
+#ifndef MODELS_PLANT_H_
+#define MODELS_PLANT_H_
 
 struct PlantMetrics {
   float temperature;
@@ -10,8 +10,8 @@ struct PlantMetrics {
 };
 
 struct Plant {
-  const char *macAddr;
+  const char *mac_addr;
   PlantMetrics metrics;
 };
 
-#endif
+#endif  // MODELS_PLANT_H_
