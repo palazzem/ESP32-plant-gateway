@@ -7,7 +7,7 @@
 #include <WiFi.h>
 
 #include "config.h"
-#include "octopus.h"
+#include "dispatcher.h"
 #include "plant.h"
 #include "sensor_reader.h"
 
@@ -37,7 +37,7 @@ void setup() {
               &hibernateTaskHandle);
 
   // Initializing these components, brings up all the network stack
-  Octopus octo = Octopus(config);
+  Dispatcher dispatcher = Dispatcher(config);
   SensorReader sensorReader = SensorReader(config);
 
   // process devices
@@ -55,7 +55,7 @@ void setup() {
       }
     }
 
-    // TODO: needs to send data via Octopus (aka: Dispatcher)
+    // TODO: needs to send data via Dispatcher
     plant.metrics = metrics;
   }
 

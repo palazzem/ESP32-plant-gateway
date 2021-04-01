@@ -1,13 +1,13 @@
-#include <octopus.h>
+#include <dispatcher.h>
 
 // Both clients must stay in the outer scope, otherwise the destructor
 // is called, causing a NULL pointer access crash.
 // TODO: maybe Octopus must not declare this and inject from the outside for
 // simplified testing.
-WiFiClient wifiClient;
-PubSubClient mqttClient;
+WiFiClient wifi_client;
+PubSubClient mqtt_client;
 
-Octopus::Octopus(PlantConfig config) {
+Dispatcher::Dispatcher(PlantConfig config) {
   // Initialize WiFi
   WiFi.begin(config.wifiSSID, config.wifiPassword);
 
@@ -15,28 +15,28 @@ Octopus::Octopus(PlantConfig config) {
     delay(500);
   }
 
-  mqttClient.setClient(wifiClient);
+  mqtt_client_.setClient(wifi_client);
 
   // Initialize MQTT client
-  this->m_mqtt_client.setServer(config.mqttHost, config.mqttPort);
+  this->mqtt_client_.setServer(config.mqttHost, config.mqttPort);
 
-  while (!this->m_mqtt_client.connected()) {
-    if (!this->m_mqtt_client.connect(config.mqttClientID, config.mqttUsername,
+  while (!this->mqtt_client_.connected()) {
+    if (!this->mqtt_client_.connect(config.mqttClientID, config.mqttUsername,
                                      config.mqttPassword)) {
       delay(config.mqttRetryWait);
     }
   }
-  this->m_mqtt_client = mqttClient;
+  this->mqtt_client_ = mqtt_client;
 }
 
-Octopus::~Octopus() {
+Dispatcher::~Dispatcher() {
   // MQTT disconnection
-  this->m_mqtt_client.disconnect();
+  this->mqtt_client_.disconnect();
 
   // WiFi disconnection
   WiFi.disconnect(true);
 }
 
-bool Octopus::publish(const char *topic, const char *payload) {
-  return this->m_mqtt_client.publish(topic, payload);
+bool Dispatcher::publish(const char *topic, const char *payload) {
+  return this->mqtt_client_.publish(topic, payload);
 }
