@@ -7,7 +7,7 @@ build:
 	pio run -e esp32dev
 
 format-check:
-	clang-format --dry-run -Werror -style=LLVM include/* src/* test/*
+	find . -name '*.cpp' -o -name '*.h' | egrep -v ".pio" | xargs clang-format --dry-run -Werror -style=google
 
 format:
-	clang-format -i -style=LLVM include/* src/* test/*
+	find . -name '*.cpp' -o -name '*.h' | egrep -v ".pio" | xargs clang-format -i -style=google
