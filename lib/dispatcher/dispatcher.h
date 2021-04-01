@@ -12,7 +12,7 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 
-#include <config.h>
+#include "config.h"
 
 class Dispatcher {
 private:

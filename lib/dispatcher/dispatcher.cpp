@@ -1,4 +1,4 @@
-#include <dispatcher.h>
+#include "dispatcher.h"
 
 // Both clients must stay in the outer scope, otherwise the destructor
 // is called, causing a NULL pointer access crash.

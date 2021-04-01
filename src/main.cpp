@@ -7,13 +7,13 @@
 #include <WiFi.h>
 
 #include "config.h"
-#include "dispatcher.h"
 #include "plant.h"
+#include "dispatcher.h"
 #include "sensor_reader.h"
 
 AppConfig config{};
 
-TaskHandle_t hibernateTaskHandle = NULL;
+TaskHandle_t hibernate_task_handle = NULL;
 
 void hibernate() {
   Serial.println("Going to sleep now.");
@@ -34,7 +34,7 @@ void setup() {
 
   // create a hibernate task in case something gets stuck
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1,
-              &hibernateTaskHandle);
+              &hibernate_task_handle);
 
   // Initializing these components, brings up all the network stack
   Dispatcher dispatcher = Dispatcher(config);
@@ -60,7 +60,7 @@ void setup() {
   }
 
   // delete emergency hibernate task
-  vTaskDelete(hibernateTaskHandle);
+  vTaskDelete(hibernate_task_handle);
 }
 
 // Loop is not used. When this code path is reached, the system goes in deep
