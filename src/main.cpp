@@ -45,6 +45,7 @@ void setup() {
     int retry = 0;
     Plant plant = {config.sensors_mac_addr[i]};
     Serial.print("Processing plant: ");
+    Serial.println(plant.mac_addr);
 
     bool result = false;
     while (retry < config.sensor_reading_retries || result == false) {
@@ -53,11 +54,18 @@ void setup() {
       result = sensorReader.query(plant, plant.metrics);
     }
 
+    if (result == false) {
+      Serial.println("Skipping sensor...");
+      continue;
+    }
+
     Serial.println("Sensor read with success!");
 
     bool sendResult = dispatcher.sendPlant(plant);
     if (sendResult) {
       Serial.println("Metrics sent with success!");
+    } else {
+      Serial.println("Failed in sending metrics!");
     }
   }
 
