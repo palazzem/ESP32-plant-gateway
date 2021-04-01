@@ -1,8 +1,6 @@
 #ifndef MOCK_WIFI_H
 #define MOCK_WIFI_H
 
-#include <WiFiClient.h>
-
 typedef enum {
   WL_NO_SHIELD = 255,
   WL_IDLE_STATUS = 0,
