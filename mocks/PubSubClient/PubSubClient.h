@@ -7,14 +7,14 @@ class PubSubClient {
 public:
   PubSubClient();
 
-  PubSubClient &setClient(Client &client);
-  PubSubClient &setServer(const char *domain, int port);
+  virtual PubSubClient &setClient(Client &client);
+  virtual PubSubClient &setServer(const char *domain, int port);
 
-  bool publish(const char *topic, const char *payload);
-  bool connect(const char *id, const char *user, const char *pass);
-  bool connected();
-  void disconnect();
-  int state();
+  virtual bool publish(const char *topic, const char *payload);
+  virtual bool connect(const char *id, const char *user, const char *pass);
+  virtual bool connected();
+  virtual void disconnect();
+  virtual int state();
 };
 
 #endif

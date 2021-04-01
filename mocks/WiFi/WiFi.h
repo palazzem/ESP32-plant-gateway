@@ -16,9 +16,11 @@ class WiFiClass {
 public:
   WiFiClass();
 
-  wl_status_t begin(const char *ssid, const char *passphrase);
-  wl_status_t status();
-  bool disconnect(bool wifioff);
+  virtual wl_status_t begin(const char *ssid, const char *passphrase) {
+    return WL_NO_SHIELD;
+  };
+  virtual wl_status_t status() { return WL_NO_SHIELD; };
+  virtual bool disconnect(bool wifioff) { return false; };
 };
 
 extern WiFiClass WiFi;
