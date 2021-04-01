@@ -41,25 +41,27 @@ void setup() {
   SensorReader sensorReader = SensorReader(config);
 
   // process devices
-  for (int i = 0; i < sizeof(config.sensors_mac_addr); i++) {
+  for (int i = 0; i < config.sensors_mac_addr.size(); i++) {
     int retry = 0;
-    PlantMetrics metrics;
     Plant plant = {config.sensors_mac_addr[i]};
+    Serial.print("Processing plant: ");
 
-    while (retry < config.sensor_reading_retries) {
+    bool result = false;
+    while (retry < config.sensor_reading_retries || result == false) {
+      Serial.print("Reading sensor...");
       ++retry;
-      bool result = sensorReader.query(plant, plant.metrics);
-      if (result) {
-        Serial.println("Sensor read with success!");
-        break;
-      }
+      result = sensorReader.query(plant, plant.metrics);
     }
 
-    // TODO: needs to send data via Dispatcher
-    plant.metrics = metrics;
+    Serial.println("Sensor read with success!");
+
+    bool sendResult = dispatcher.sendPlant(plant);
+    if (sendResult) {
+      Serial.println("Metrics sent with success!");
+    }
   }
 
-  // delete emergency hibernate task
+  // Delete emergency hibernate task
   vTaskDelete(hibernate_task_handle);
 }
 
