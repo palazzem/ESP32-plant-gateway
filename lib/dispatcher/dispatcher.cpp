@@ -7,10 +7,11 @@ const int kMQTTBufferSize = 4;
 // is called, causing a NULL pointer access crash.
 // TODO: maybe Octopus must not declare this and inject from the outside for
 // simplified testing.
-WiFiClient wifi_client;
-PubSubClient mqtt_client;
 
 Dispatcher::Dispatcher(AppConfig config) {
+  // Config initialization
+  this->base_topic_ = config.mqtt_base_topic;
+
   // Initialize WiFi
   WiFi.begin(config.wifi_ssid, config.wifi_password);
 
@@ -18,7 +19,7 @@ Dispatcher::Dispatcher(AppConfig config) {
     delay(500);
   }
 
-  mqtt_client_.setClient(wifi_client);
+  mqtt_client_.setClient(wifi_client_);
 
   // Initialize MQTT client
   this->mqtt_client_.setServer(config.mqtt_host, config.mqtt_port);
@@ -29,8 +30,6 @@ Dispatcher::Dispatcher(AppConfig config) {
       delay(config.mqtt_retry_wait);
     }
   }
-  this->mqtt_client_ = mqtt_client;
-  this->base_topic_ = config.mqtt_base_topic;
 }
 
 Dispatcher::~Dispatcher() {

@@ -20,6 +20,7 @@
 class Dispatcher {
  private:
   std::string base_topic_;
+  WiFiClient wifi_client_;
   PubSubClient mqtt_client_;
 
   void sendMetric(const std::string prefix, const std::string metric_name,
