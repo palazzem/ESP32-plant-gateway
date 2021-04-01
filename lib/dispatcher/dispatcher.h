@@ -12,16 +12,26 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 
+#include <string>
+
 #include "config.h"
+#include "plant.h"
 
 class Dispatcher {
  private:
+  std::string base_topic_;
   PubSubClient mqtt_client_;
+
+  void sendMetric(const std::string prefix, const std::string metric_name,
+                  const char *mac_addr, const float value);
+  void sendMetric(const std::string prefix, const std::string metric_name,
+                  const char *mac_addr, const int value);
 
  public:
   Dispatcher(AppConfig config);
   ~Dispatcher();
-  bool publish(const char *topic, const char *payload);
+
+  bool sendPlant(Plant plant);
 };
 
 #endif  // LIB_DISPATCHER_DISPATCHER_H_

@@ -25,7 +25,7 @@ struct AppConfig {
   // MQTT topic are defined as "<MQTT_BASE_TOPIC>/<MAC_ADDRESS>/<property>"
   // where MAC_ADDRESS is one of the values from FLORA_DEVICES array
   // property is either temperature, moisture, conductivity, light or battery
-  const char *mqtt_base_topic = "";
+  const std::string mqtt_base_topic = "";
   // Duration (milliseconds) before retry in sending MQTT messages
   const int mqtt_retry_wait = 5 * 1000;
 };
