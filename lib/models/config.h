@@ -4,9 +4,11 @@
 #ifndef MODELS_CONFIG_H_
 #define MODELS_CONFIG_H_
 
+#include <vector>
+
 struct AppConfig {
   // List of sensor(s) queried by the system
-  const char *sensors_mac_addr[0] = {};
+  const std::vector<const char*> sensors_mac_addr {};
   // Duration (seconds) between runs (deep sleep mode)
   const int deep_sleep_duration = 30 * 60;
   // Max duration (seconds) before forcing a deep sleep
