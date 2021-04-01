@@ -19,7 +19,7 @@ private:
   PubSubClient mqtt_client_;
 
 public:
-  Dispatcher(PlantConfig config);
+  Dispatcher(AppConfig config);
   ~Dispatcher();
   bool publish(const char *topic, const char *payload);
 };

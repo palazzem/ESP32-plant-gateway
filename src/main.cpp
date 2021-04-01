@@ -11,18 +11,18 @@
 #include "plant.h"
 #include "sensor_reader.h"
 
-PlantConfig config{};
+AppConfig config{};
 
 TaskHandle_t hibernateTaskHandle = NULL;
 
 void hibernate() {
   Serial.println("Going to sleep now.");
   delay(100);
-  esp_deep_sleep(config.deepSleepDuration * 1000000ll);
+  esp_deep_sleep(config.deep_sleep_duration * 1000000ll);
 }
 
 void delayedHibernate(void *parameter) {
-  delay(config.emergencySleepDuration * 1000); // delay for five minutes
+  delay(config.emergency_sleep_duration * 1000); // delay for five minutes
   Serial.println("Something got stuck, entering emergency hibernate...");
   hibernate();
 }
@@ -41,12 +41,12 @@ void setup() {
   SensorReader sensorReader = SensorReader(config);
 
   // process devices
-  for (int i = 0; i < sizeof(config.sensorsMacAddr); i++) {
+  for (int i = 0; i < sizeof(config.sensors_mac_addr); i++) {
     int retry = 0;
     PlantMetrics metrics;
-    Plant plant = {config.sensorsMacAddr[i]};
+    Plant plant = {config.sensors_mac_addr[i]};
 
-    while (retry < config.sensorReadingRetries) {
+    while (retry < config.sensor_reading_retries) {
       ++retry;
       bool result = sensorReader.query(plant, plant.metrics);
       if (result) {

@@ -7,9 +7,9 @@
 WiFiClient wifi_client;
 PubSubClient mqtt_client;
 
-Dispatcher::Dispatcher(PlantConfig config) {
+Dispatcher::Dispatcher(AppConfig config) {
   // Initialize WiFi
-  WiFi.begin(config.wifiSSID, config.wifiPassword);
+  WiFi.begin(config.wifi_ssid, config.wifi_password);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -18,12 +18,12 @@ Dispatcher::Dispatcher(PlantConfig config) {
   mqtt_client_.setClient(wifi_client);
 
   // Initialize MQTT client
-  this->mqtt_client_.setServer(config.mqttHost, config.mqttPort);
+  this->mqtt_client_.setServer(config.mqtt_host, config.mqtt_port);
 
   while (!this->mqtt_client_.connected()) {
-    if (!this->mqtt_client_.connect(config.mqttClientID, config.mqttUsername,
-                                     config.mqttPassword)) {
-      delay(config.mqttRetryWait);
+    if (!this->mqtt_client_.connect(config.mqtt_client_id, config.mqtt_username,
+                                     config.mqtt_password)) {
+      delay(config.mqtt_retry_wait);
     }
   }
   this->mqtt_client_ = mqtt_client;

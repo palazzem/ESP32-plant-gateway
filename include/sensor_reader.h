@@ -20,7 +20,7 @@ private:
   int parseBattery(const char *rawData);
 
 public:
-  SensorReader(PlantConfig config);
+  SensorReader(AppConfig config);
   ~SensorReader();
   bool query(Plant plant, PlantMetrics &metrics);
 };

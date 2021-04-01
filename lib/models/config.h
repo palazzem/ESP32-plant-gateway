@@ -1,33 +1,33 @@
 /**
  * Defines configuration constants that are used inside the application.
  */
-#ifndef PLANT_CONFIGURATION_H
-#define PLANT_CONFIGURATION_H
+#ifndef MODELS_CONFIG_H_
+#define MODELS_CONFIG_H_
 
-struct PlantConfig {
+struct AppConfig {
   // List of sensor(s) queried by the system
-  const char *sensorsMacAddr[0] = {};
+  const char *sensors_mac_addr[0] = {};
   // Duration (seconds) between runs (deep sleep mode)
-  const int deepSleepDuration = 30 * 60;
+  const int deep_sleep_duration = 30 * 60;
   // Max duration (seconds) before forcing a deep sleep
-  const int emergencySleepDuration = 3 * 60;
+  const int emergency_sleep_duration = 3 * 60;
   // Number of retries in reading sensor data
-  const int sensorReadingRetries = 3;
+  const int sensor_reading_retries = 3;
   // WiFi Credentials
-  const char *wifiSSID = "";
-  const char *wifiPassword = "";
+  const char *wifi_ssid = "";
+  const char *wifi_password = "";
   // MQTT broker configuration
-  const int mqttPort = 1883;
-  const char *mqttHost = "";
-  const char *mqttUsername = "";
-  const char *mqttPassword = "";
-  const char *mqttClientID = "";
+  const int mqtt_port = 1883;
+  const char *mqtt_host = "";
+  const char *mqtt_username = "";
+  const char *mqtt_password = "";
+  const char *mqtt_client_id = "";
   // MQTT topic are defined as "<MQTT_BASE_TOPIC>/<MAC_ADDRESS>/<property>"
   // where MAC_ADDRESS is one of the values from FLORA_DEVICES array
   // property is either temperature, moisture, conductivity, light or battery
-  const char *mqttBaseTopic = "";
+  const char *mqtt_base_topic = "";
   // Duration (milliseconds) before retry in sending MQTT messages
-  const int mqttRetryWait = 5 * 1000;
+  const int mqtt_retry_wait = 5 * 1000;
 };
 
-#endif
+#endif  // MODELS_CONFIG_H_
